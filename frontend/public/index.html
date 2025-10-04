@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog Filter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Product Catalog Filter</h1>
+            <p>Search and filter through our product catalog</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search products by name, brand, category, or SKU...">
+            </div>
+            <button id="generateBtn" class="btn btn-primary">Generate Products</button>
+            <button id="loadBtn" class="btn btn-success">Load Products</button>
+        </div>
+
+    <div id="status" class="status"></div>
+
+    <div id="productsContainer">
+        <div class="loading">Click "Load Products" to get started</div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

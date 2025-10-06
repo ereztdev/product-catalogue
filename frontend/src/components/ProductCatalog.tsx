@@ -11,6 +11,7 @@ const ProductCatalog: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  // Removed unused searchLoading state
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   
   const apiService = useMemo(() => new ApiService(), []);
@@ -55,7 +56,18 @@ const ProductCatalog: React.FC = () => {
     }
   };
 
-  const searchProducts = async (query: string) => {
+  const showStatus = useCallback((text: string, type: 'success' | 'error' | 'info') => {
+    setStatusMessage({ text, type });
+    
+    // Auto-hide success messages after 1 second
+    if (type === 'success') {
+      setTimeout(() => {
+        setStatusMessage(null);
+      }, 1000);
+    }
+  }, []);
+
+  const searchProducts = useCallback(async (query: string) => {
     try {
       if (query.trim() === '') {
         setFilteredProducts(products);
@@ -67,23 +79,15 @@ const ProductCatalog: React.FC = () => {
     } catch (error) {
       showStatus(`Search error: ${error}`, 'error');
     }
-  };
-
-  const showStatus = (text: string, type: 'success' | 'error' | 'info') => {
-    setStatusMessage({ text, type });
-    
-    // Auto-hide success messages after 1 second
-    if (type === 'success') {
-      setTimeout(() => {
-        setStatusMessage(null);
-      }, 1000);
-    }
-  };
+  }, [products, apiService, showStatus]);
 
   return (
     <div className="product-catalog">
       <div className="controls">
         <SearchBar onSearch={searchProducts} />
+      </div>
+      
+      <div className="add-products-container">
         <AddProductsButton onAddProducts={addProducts} loading={loading} />
       </div>
       

@@ -1,7 +1,8 @@
 import { Product } from '../types/Product';
 
 export class ApiService {
-  private baseUrl = '';
+  private baseUrl = 'http://localhost:3000';
+  private abortController: AbortController | null = null;
 
   async generateProducts(count: number = 1000): Promise<{ message: string }> {
     try {
@@ -39,7 +40,17 @@ export class ApiService {
 
   async searchProducts(query: string): Promise<Product[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/products/search?q=${encodeURIComponent(query)}`);
+      // Cancel previous request if it exists
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+
+      // Create new abort controller for this request
+      this.abortController = new AbortController();
+
+      const response = await fetch(`${this.baseUrl}/products/search?q=${encodeURIComponent(query)}`, {
+        signal: this.abortController.signal
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,6 +58,10 @@ export class ApiService {
 
       return await response.json();
     } catch (error) {
+      // Don't throw error if request was aborted
+      if (error instanceof Error && error.name === 'AbortError') {
+        return [];
+      }
       throw new Error(`Search failed: ${error}`);
     }
   }

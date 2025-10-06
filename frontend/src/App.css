@@ -45,11 +45,13 @@ body {
 
 /* Controls */
 .controls {
+  margin-bottom: 20px;
+}
+
+.add-products-container {
   display: flex;
-  gap: 15px;
+  justify-content: center;
   margin-bottom: 30px;
-  flex-wrap: wrap;
-  align-items: center;
 }
 
 .search-container {
@@ -70,6 +72,25 @@ body {
   outline: none;
   border-color: #3498db;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.search-input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.search-loading {
+  color: #3498db;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.search-hint {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  font-style: italic;
 }
 
 /* Buttons */

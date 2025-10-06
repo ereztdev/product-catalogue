@@ -27,6 +27,13 @@ db.serialize(() => {
     stock_quantity INTEGER,
     sku TEXT UNIQUE
   )`);
+  
+  // Add indexes for search performance
+  db.run(`CREATE INDEX IF NOT EXISTS idx_products_name ON products(name COLLATE NOCASE)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_products_description ON products(description COLLATE NOCASE)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category COLLATE NOCASE)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_products_brand ON products(brand COLLATE NOCASE)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku COLLATE NOCASE)`);
 });
 
 // Sample data generators
@@ -152,10 +159,20 @@ app.get('/products/search', (req, res) => {
   
   const searchTerm = `%${query}%`;
   const sql = `SELECT * FROM products 
-               WHERE name LIKE ? OR description LIKE ? OR category LIKE ? OR brand LIKE ? OR sku LIKE ?
-               ORDER BY name`;
+               WHERE name LIKE ? COLLATE NOCASE OR description LIKE ? COLLATE NOCASE OR category LIKE ? COLLATE NOCASE OR brand LIKE ? COLLATE NOCASE OR sku LIKE ? COLLATE NOCASE
+               ORDER BY 
+                 CASE 
+                   WHEN name LIKE ? COLLATE NOCASE THEN 1
+                   WHEN brand LIKE ? COLLATE NOCASE THEN 2
+                   WHEN category LIKE ? COLLATE NOCASE THEN 3
+                   WHEN sku LIKE ? COLLATE NOCASE THEN 4
+                   WHEN description LIKE ? COLLATE NOCASE THEN 5
+                   ELSE 6
+                 END,
+                 name`;
   
-  db.all(sql, [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm], (err, rows) => {
+  const exactMatch = `${query}`;
+  db.all(sql, [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, exactMatch, exactMatch, exactMatch, exactMatch, exactMatch], (err, rows) => {
     if (err) {
       res.status(500).json({ error: 'Failed to search products' });
     } else {

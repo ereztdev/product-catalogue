@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('../frontend/public'));
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Database setup - use in-memory database for tests
 const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : './products.db';
@@ -42,6 +42,10 @@ function generateRandomProduct() {
   const brand = brands[Math.floor(Math.random() * brands.length)];
   const name = productNames[Math.floor(Math.random() * productNames.length)];
   
+  // Generate a more unique SKU using timestamp and random number
+  const timestamp = Date.now().toString().slice(-6);
+  const randomNum = Math.floor(Math.random() * 10000);
+  
   return {
     name: `${brand} ${name}`,
     description: `Professional ${name.toLowerCase()} from ${brand}. Competitive rates and excellent customer service.`,
@@ -49,11 +53,22 @@ function generateRandomProduct() {
     brand: brand,
     price: (Math.random() * 50000 + 1000).toFixed(2), // Financial products have higher values
     stock_quantity: Math.floor(Math.random() * 50) + 1, // Lower stock quantities for financial products
-    sku: `${brand.substring(0, 3).toUpperCase()}${Math.floor(Math.random() * 10000)}`
+    sku: `${brand.substring(0, 3).toUpperCase()}${timestamp}${randomNum}`
   };
 }
 
 // Routes
+
+// Clear all products endpoint
+app.delete('/products', (req, res) => {
+  db.run('DELETE FROM products', (err) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to clear products' });
+    } else {
+      res.json({ message: 'All products cleared successfully' });
+    }
+  });
+});
 
 // Generate products endpoint
 app.post('/products/generate', (req, res) => {
@@ -63,17 +78,29 @@ app.post('/products/generate', (req, res) => {
     const stmt = db.prepare(`INSERT INTO products (name, description, category, brand, price, stock_quantity, sku) 
                              VALUES (?, ?, ?, ?, ?, ?, ?)`);
     
+    let successCount = 0;
+    let errorCount = 0;
+    
     for (let i = 0; i < count; i++) {
       const product = generateRandomProduct();
       stmt.run(product.name, product.description, product.category, product.brand, 
-               product.price, product.stock_quantity, product.sku);
+               product.price, product.stock_quantity, product.sku, (err) => {
+        if (err) {
+          errorCount++;
+          console.log(`Error inserting product: ${err.message}`);
+        } else {
+          successCount++;
+        }
+      });
     }
     
     stmt.finalize((err) => {
       if (err) {
         res.status(500).json({ error: 'Failed to generate products' });
       } else {
-        res.json({ message: `Added ${count} products successfully` });
+        res.json({ 
+          message: `Added ${successCount} products successfully${errorCount > 0 ? ` (${errorCount} duplicates skipped)` : ''}` 
+        });
       }
     });
   });
@@ -120,9 +147,9 @@ app.get('/products/search', (req, res) => {
   });
 });
 
-// Serve the main page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/public', 'index.html'));
+// Serve the React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 // Start server only if not in test environment

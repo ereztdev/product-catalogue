@@ -30,11 +30,11 @@ db.serialize(() => {
 });
 
 // Sample data generators
-const categories = ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports', 'Beauty', 'Toys', 'Automotive'];
-const brands = ['Apple', 'Samsung', 'Nike', 'Adidas', 'Sony', 'Microsoft', 'Google', 'Amazon', 'Tesla', 'Toyota'];
+const categories = ['Personal Loans', 'Home Loans', 'Business Loans', 'Auto Loans', 'Student Loans', 'Credit Cards', 'Investment Products', 'Insurance'];
+const brands = ['Chase', 'Bank of America', 'Wells Fargo', 'Citibank', 'Goldman Sachs', 'Morgan Stanley', 'JPMorgan', 'American Express', 'Capital One', 'Discover'];
 const productNames = [
-  'Smartphone', 'Laptop', 'Headphones', 'T-Shirt', 'Jeans', 'Sneakers', 'Book', 'Tablet',
-  'Camera', 'Watch', 'Backpack', 'Sunglasses', 'Coffee Maker', 'Blender', 'Vacuum', 'Chair'
+  'Personal Loan', 'Mortgage Loan', 'Business Credit Line', 'Auto Financing', 'Student Loan', 'Credit Card', 'Investment Account', 'Savings Account',
+  'Checking Account', 'Certificate of Deposit', 'Money Market Account', 'IRA Account', '401k Plan', 'Life Insurance', 'Auto Insurance', 'Home Insurance'
 ];
 
 function generateRandomProduct() {
@@ -44,11 +44,11 @@ function generateRandomProduct() {
   
   return {
     name: `${brand} ${name}`,
-    description: `High-quality ${name.toLowerCase()} from ${brand}. Perfect for everyday use.`,
+    description: `Professional ${name.toLowerCase()} from ${brand}. Competitive rates and excellent customer service.`,
     category: category,
     brand: brand,
-    price: (Math.random() * 1000 + 10).toFixed(2),
-    stock_quantity: Math.floor(Math.random() * 100) + 1,
+    price: (Math.random() * 50000 + 1000).toFixed(2), // Financial products have higher values
+    stock_quantity: Math.floor(Math.random() * 50) + 1, // Lower stock quantities for financial products
     sku: `${brand.substring(0, 3).toUpperCase()}${Math.floor(Math.random() * 10000)}`
   };
 }
@@ -60,9 +60,6 @@ app.post('/products/generate', (req, res) => {
   const count = req.body.count || 100;
   
   db.serialize(() => {
-    // Clear existing products
-    db.run('DELETE FROM products');
-    
     const stmt = db.prepare(`INSERT INTO products (name, description, category, brand, price, stock_quantity, sku) 
                              VALUES (?, ?, ?, ?, ?, ?, ?)`);
     
@@ -76,7 +73,7 @@ app.post('/products/generate', (req, res) => {
       if (err) {
         res.status(500).json({ error: 'Failed to generate products' });
       } else {
-        res.json({ message: `Generated ${count} products successfully` });
+        res.json({ message: `Added ${count} products successfully` });
       }
     });
   });

@@ -90,9 +90,9 @@ class UIController {
     initializeElements() {
         this.searchInput = document.getElementById('searchInput');
         this.generateBtn = document.getElementById('generateBtn');
-        this.loadBtn = document.getElementById('loadBtn');
         this.status = document.getElementById('status');
         this.productsContainer = document.getElementById('productsContainer');
+        this.countText = document.getElementById('countText');
     }
 
     /**
@@ -100,12 +100,11 @@ class UIController {
      */
     bindEvents() {
         this.generateBtn.addEventListener('click', () => this.handleGenerateProducts());
-        this.loadBtn.addEventListener('click', () => this.handleLoadProducts());
         
         this.searchInput.addEventListener('input', (e) => this.handleSearchInput(e));
         
-        // Load products when page loads
-        window.addEventListener('load', () => this.handleLoadProducts());
+        // Load products when page loads (silently)
+        window.addEventListener('load', () => this.handleLoadProducts(false, false));
     }
 
     /**
@@ -113,36 +112,41 @@ class UIController {
      */
     async handleGenerateProducts() {
         try {
-            this.setButtonState(this.generateBtn, true, 'Generating...');
-            this.showStatus('Generating products...', 'info');
+            this.setButtonState(this.generateBtn, true, 'Adding...');
+            this.showStatus('Adding products...', 'info');
 
             const result = await this.apiService.generateProducts(100);
             this.showStatus(result.message, 'success');
             
-            // Automatically load products after generation
-            await this.handleLoadProducts();
+            // Automatically load products after generation (with success message)
+            await this.handleLoadProducts(true, true);
         } catch (error) {
-            this.showStatus(`Error generating products: ${error.message}`, 'error');
+            this.showStatus(`Error adding products: ${error.message}`, 'error');
         } finally {
-            this.setButtonState(this.generateBtn, false, 'Generate Products');
+            this.setButtonState(this.generateBtn, false, 'Add Products');
         }
     }
 
     /**
-     * Handle load products button click
+     * Load products from API
      */
-    async handleLoadProducts() {
+    async handleLoadProducts(showSuccessMessage = true, showLoadingMessage = true) {
         try {
-            this.setButtonState(this.loadBtn, true, 'Loading...');
-            this.showStatus('Loading products...', 'info');
+            if (showLoadingMessage) {
+                this.showStatus('Loading products...', 'info');
+            }
 
             this.products = await this.apiService.getAllProducts();
             this.displayProducts(this.products);
-            this.showStatus(`Loaded ${this.products.length} products`, 'success');
+            
+            if (showSuccessMessage && this.products.length > 0) {
+                this.showStatus(`Loaded ${this.products.length} products`, 'success');
+            } else if (this.products.length === 0 && showLoadingMessage) {
+                this.showStatus('No products found. Click "Add Products" to get started.', 'info');
+            }
         } catch (error) {
             this.showStatus(`Error loading products: ${error.message}`, 'error');
-        } finally {
-            this.setButtonState(this.loadBtn, false, 'Load Products');
+            this.updateProductCount(0);
         }
     }
 
@@ -183,6 +187,8 @@ class UIController {
      * Display products in the UI
      */
     displayProducts(productsToShow) {
+        this.updateProductCount(productsToShow.length);
+        
         if (productsToShow.length === 0) {
             this.productsContainer.innerHTML = `
                 <div class="no-products">
@@ -217,6 +223,19 @@ class UIController {
     }
 
     /**
+     * Update the product count display
+     */
+    updateProductCount(count) {
+        if (count === 0) {
+            this.countText.textContent = 'No products found';
+        } else if (count === 1) {
+            this.countText.textContent = 'Showing 1 product';
+        } else {
+            this.countText.textContent = `Showing ${count} products`;
+        }
+    }
+
+    /**
      * Show status message to user
      */
     showStatus(message, type = 'info') {
@@ -228,7 +247,7 @@ class UIController {
         if (type === 'success') {
             setTimeout(() => {
                 this.status.style.display = 'none';
-            }, 3000);
+            }, 1000);
         }
     }
 

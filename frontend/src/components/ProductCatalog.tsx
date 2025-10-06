@@ -42,13 +42,12 @@ const ProductCatalog: React.FC = () => {
   const addProducts = async () => {
     try {
       setLoading(true);
-      showStatus('Adding products...', 'info');
       
       const result = await apiService.generateProducts(1000);
       showStatus(result.message, 'success');
       
-      // Reload products after adding
-      await loadProducts(true);
+      // Reload products after adding (without showing success message)
+      await loadProducts(false);
     } catch (error) {
       showStatus(`Error adding products: ${error}`, 'error');
     } finally {

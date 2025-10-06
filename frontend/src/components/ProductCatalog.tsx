@@ -43,7 +43,7 @@ const ProductCatalog: React.FC = () => {
       setLoading(true);
       showStatus('Adding products...', 'info');
       
-      const result = await apiService.generateProducts(100);
+      const result = await apiService.generateProducts(1000);
       showStatus(result.message, 'success');
       
       // Reload products after adding

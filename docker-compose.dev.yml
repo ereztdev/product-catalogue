@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  product-catalogue-dev:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      # Mount source code for hot reload
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./backend/products.db:/app/backend/products.db
+    command: ["npm", "run", "dev"]
+    restart: unless-stopped

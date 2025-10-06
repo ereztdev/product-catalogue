@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  product-catalogue:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # Mount database file for persistence
+      - ./backend/products.db:/app/backend/products.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/products"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

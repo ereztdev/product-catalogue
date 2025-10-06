@@ -9,7 +9,15 @@
     "test": "cd backend && npm test",
     "install-backend": "cd backend && npm install",
     "install-frontend": "cd frontend && npm install",
-    "install-all": "npm run install-backend && npm run install-frontend"
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "build": "cd frontend && npm run build",
+    "build-all": "npm run install-all && npm run build",
+    "docker:build": "docker build -t product-catalogue .",
+    "docker:run": "docker run -p 3000:3000 product-catalogue",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker-compose up --build",
+    "docker:stop": "docker-compose down",
+    "start-linux": "./start-server.sh"
   },
   "keywords": ["product", "catalog", "filter", "nodejs", "express", "react-native"],
   "author": "",

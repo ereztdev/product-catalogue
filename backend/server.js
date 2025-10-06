@@ -75,11 +75,15 @@ app.post('/products/generate', (req, res) => {
   const count = req.body.count || 100;
   
   db.serialize(() => {
+    // Start transaction for better performance
+    db.run('BEGIN TRANSACTION');
+    
     const stmt = db.prepare(`INSERT INTO products (name, description, category, brand, price, stock_quantity, sku) 
                              VALUES (?, ?, ?, ?, ?, ?, ?)`);
     
     let successCount = 0;
     let errorCount = 0;
+    let completed = 0;
     
     for (let i = 0; i < count; i++) {
       const product = generateRandomProduct();
@@ -91,18 +95,31 @@ app.post('/products/generate', (req, res) => {
         } else {
           successCount++;
         }
+        
+        completed++;
+        
+        // Check if all products have been processed
+        if (completed === count) {
+          stmt.finalize((err) => {
+            if (err) {
+              db.run('ROLLBACK');
+              res.status(500).json({ error: 'Failed to generate products' });
+            } else {
+              // Commit transaction
+              db.run('COMMIT', (err) => {
+                if (err) {
+                  res.status(500).json({ error: 'Failed to commit products' });
+                } else {
+                  res.json({ 
+                    message: `Added ${successCount} products successfully${errorCount > 0 ? ` (${errorCount} duplicates skipped)` : ''}` 
+                  });
+                }
+              });
+            }
+          });
+        }
       });
     }
-    
-    stmt.finalize((err) => {
-      if (err) {
-        res.status(500).json({ error: 'Failed to generate products' });
-      } else {
-        res.json({ 
-          message: `Added ${successCount} products successfully${errorCount > 0 ? ` (${errorCount} duplicates skipped)` : ''}` 
-        });
-      }
-    });
   });
 });
 

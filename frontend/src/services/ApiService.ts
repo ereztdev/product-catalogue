@@ -3,7 +3,7 @@ import { Product } from '../types/Product';
 export class ApiService {
   private baseUrl = '';
 
-  async generateProducts(count: number = 100): Promise<{ message: string }> {
+  async generateProducts(count: number = 1000): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/products/generate`, {
         method: 'POST',

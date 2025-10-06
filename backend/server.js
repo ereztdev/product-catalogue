@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Database setup - use in-memory database for tests
-const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : './products.db';
+const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : (process.env.DB_PATH || './products.db');
 const db = new sqlite3.Database(dbPath);
 
 // Initialize database
@@ -178,6 +178,16 @@ app.get('/products/search', (req, res) => {
     } else {
       res.json(rows);
     }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 

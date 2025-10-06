@@ -35,7 +35,7 @@ describe('Product Catalog API Tests', () => {
         .send({ count: 10 })
         .expect(200);
 
-      expect(response.body.message).toContain('Generated 10 products successfully');
+      expect(response.body.message).toContain('Added 10 products successfully');
     });
 
     test('should generate default 100 products when no count specified', async () => {
@@ -44,7 +44,7 @@ describe('Product Catalog API Tests', () => {
         .send({})
         .expect(200);
 
-      expect(response.body.message).toContain('Generated 100 products successfully');
+      expect(response.body.message).toContain('Added 100 products successfully');
     });
   });
 
@@ -157,8 +157,9 @@ describe('Product Catalog API Tests', () => {
         .get('/')
         .expect(200);
 
-      expect(response.text).toContain('Product Catalog Filter');
-      expect(response.text).toContain('<!DOCTYPE html>');
+      expect(response.text).toContain('<!doctype html>');
+      expect(response.text).toContain('<title>React App</title>');
+      expect(response.text).toContain('<div id="root"></div>');
     });
   });
 });

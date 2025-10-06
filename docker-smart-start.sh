@@ -36,16 +36,24 @@ start_with_retry() {
     while [ $attempt -le $max_attempts ]; do
         echo "📦 Attempt $attempt/$max_attempts"
         
-        if docker compose up --build; then
-            echo "✅ Product Catalog started successfully!"
-            return 0
+        echo "🔨 Building Docker image..."
+        if docker compose build; then
+            echo "🚀 Starting container..."
+            if docker compose up -d; then
+                echo "✅ Product Catalog started successfully!"
+                return 0
+            else
+                echo "❌ Failed to start container"
+            fi
         else
-            echo "❌ Attempt $attempt failed"
-            cleanup_port
-            cleanup_docker
-            sleep 3
-            ((attempt++))
+            echo "❌ Build failed"
         fi
+        
+        echo "❌ Attempt $attempt failed"
+        cleanup_port
+        cleanup_docker
+        sleep 3
+        ((attempt++))
     done
     
     echo "💥 Failed to start after $max_attempts attempts"

@@ -5,27 +5,16 @@
   "private": true,
   "scripts": {
     "start": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev": "npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm start",
     "build": "cd frontend && npm run build",
-    "build:prod": "npm run build && cd backend && npm start",
     "test": "cd backend && npm test",
+    "install-all": "npm run install-backend && npm run install-frontend",
     "install-backend": "cd backend && npm install",
     "install-frontend": "cd frontend && npm install",
-    "install-all": "npm run install-backend && npm run install-frontend",
-    "docker:build": "docker build -t product-catalogue .",
-    "docker:build:prod": "docker build --target production -t product-catalogue:prod .",
-    "docker:run": "docker run -p 3000:3000 product-catalogue",
-    "docker:run:prod": "docker run -p 3000:3000 product-catalogue:prod",
-    "docker:dev": "docker compose -f docker-compose.dev.yml down 2>/dev/null || true && docker compose -f docker-compose.dev.yml up --build",
     "docker:prod": "docker compose down 2>/dev/null || true && docker compose up --build",
     "docker:smart": "./docker-smart-start.sh",
-    "docker:stop": "docker compose down",
-    "docker:logs": "docker compose logs -f",
-    "docker:clean": "docker compose down -v && docker system prune -f",
-    "docker:force": "kill -9 $(lsof -ti:3000) 2>/dev/null || true && docker compose down 2>/dev/null || true && docker compose up --build",
-    "start-linux": "./start-server.sh"
+    "docker:stop": "docker compose down"
   },
   "keywords": [
     "product",
@@ -33,14 +22,11 @@
     "filter",
     "nodejs",
     "express",
-    "react-native"
+    "react",
+    "typescript"
   ],
   "author": "",
   "license": "MIT",
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "devDependencies": {
     "concurrently": "^9.2.1"
   }

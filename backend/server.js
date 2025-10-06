@@ -98,7 +98,10 @@ app.post('/products/generate', (req, res) => {
                product.price, product.stock_quantity, product.sku, (err) => {
         if (err) {
           errorCount++;
-          console.log(`Error inserting product: ${err.message}`);
+          // Skip duplicate SKU errors (expected behavior)
+          if (err.code !== 'SQLITE_CONSTRAINT') {
+            console.error(`Error inserting product: ${err.message}`);
+          }
         } else {
           successCount++;
         }

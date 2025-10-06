@@ -12,7 +12,7 @@ const AddProductsButton: React.FC<AddProductsButtonProps> = ({ onAddProducts, lo
       disabled={loading}
       className="btn btn-primary"
     >
-      {loading ? 'Adding...' : 'Add Products'}
+      {loading ? 'Wait a second...' : 'Add Products'}
     </button>
   );
 };

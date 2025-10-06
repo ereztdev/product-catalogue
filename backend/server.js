@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Database setup - use in-memory database for tests
-const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : (process.env.DB_PATH || './products.db');
+const dbPath = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production' ? ':memory:' : (process.env.DB_PATH || './products.db');
 const db = new sqlite3.Database(dbPath);
 
 // Initialize database
